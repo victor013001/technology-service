@@ -55,7 +55,8 @@ dependencies {
 	//TESTING
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
 
 	//TEST CONTAINER
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
