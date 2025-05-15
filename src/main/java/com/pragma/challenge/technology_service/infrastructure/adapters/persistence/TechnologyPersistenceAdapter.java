@@ -34,16 +34,16 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
   }
 
   @Override
-  public Mono<Boolean> existByName(String name) {
+  public Mono<Void> validName(String name) {
     return technologyRepository
         .existsByName(name)
         .flatMap(
             exist -> {
               if (Boolean.TRUE.equals(exist)) {
-                return Mono.empty();
+                log.info("{} Technology name: {} already exist", LOG_PREFIX, name);
+                return Mono.error(BadRequest::new);
               }
-              log.info("{} Technology name: {} already exist", LOG_PREFIX, name);
-              return Mono.error(BadRequest::new);
+              return Mono.empty();
             });
   }
 }

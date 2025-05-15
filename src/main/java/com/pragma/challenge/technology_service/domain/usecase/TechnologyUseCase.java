@@ -19,7 +19,7 @@ public class TechnologyUseCase implements TechnologyServicePort {
   @Override
   public Mono<Technology> registerTechnology(Technology technology) {
     return technologyPersistencePort
-        .existByName(technology.name())
-        .then(technologyPersistencePort.save(technology));
+        .validName(technology.name())
+        .then(Mono.defer(() -> technologyPersistencePort.save(technology)));
   }
 }
