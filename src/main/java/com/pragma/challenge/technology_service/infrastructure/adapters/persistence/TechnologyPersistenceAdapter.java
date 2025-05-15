@@ -4,7 +4,7 @@ import com.pragma.challenge.technology_service.domain.model.Technology;
 import com.pragma.challenge.technology_service.domain.spi.TechnologyPersistencePort;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.mapper.TechnologyEntityMapper;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyRepository;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.exceptions.standard_exception.BadRequest;
+import com.pragma.challenge.technology_service.infrastructure.entrypoints.exceptions.standard_exception.TechnologyAlreadyExists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,7 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
             exist -> {
               if (Boolean.TRUE.equals(exist)) {
                 log.info("{} Technology name: {} already exist", LOG_PREFIX, name);
-                return Mono.error(BadRequest::new);
+                return Mono.error(TechnologyAlreadyExists::new);
               }
               return Mono.empty();
             });

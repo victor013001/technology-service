@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum ServerResponses {
   BAD_REQUEST(HttpStatus.BAD_REQUEST, "Unable to process the request with the given data."),
   TECHNOLOGY_CREATED(HttpStatus.CREATED, "Technology created successfully."),
-  SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred on the server.");
+  SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred on the server."),
+  TECHNOLOGY_ALREADY_EXISTS(HttpStatus.CONFLICT, "Conflict with the given data.");
 
   private final HttpStatus httpStatus;
   private final String message;
