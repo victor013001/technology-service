@@ -8,6 +8,7 @@ import com.pragma.challenge.technology_service.infrastructure.entrypoints.except
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -20,6 +21,7 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
   private final TechnologyEntityMapper technologyEntityMapper;
 
   @Override
+  @Transactional
   public Mono<Technology> save(Technology technology) {
     log.info(
         "{} Saving technology with name: {} and description: {}.",
