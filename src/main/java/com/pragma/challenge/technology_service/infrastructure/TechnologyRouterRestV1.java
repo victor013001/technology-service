@@ -4,8 +4,8 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
+import com.pragma.challenge.technology_service.domain.exceptions.StandardError;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.exceptions.StandardError;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.TechnologyHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -73,6 +73,6 @@ public class TechnologyRouterRestV1 {
   public RouterFunction<ServerResponse> routerFunction(TechnologyHandler technologyHandler) {
     return nest(
         path("/api/v1/technology"),
-        route(RequestPredicates.POST("/"), technologyHandler::createTechnology));
+        route(RequestPredicates.POST(""), technologyHandler::createTechnology));
   }
 }

@@ -1,10 +1,10 @@
 package com.pragma.challenge.technology_service.infrastructure.adapters.persistence;
 
+import com.pragma.challenge.technology_service.domain.exceptions.standard_exception.TechnologyAlreadyExists;
 import com.pragma.challenge.technology_service.domain.model.Technology;
 import com.pragma.challenge.technology_service.domain.spi.TechnologyPersistencePort;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.mapper.TechnologyEntityMapper;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyRepository;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.exceptions.standard_exception.TechnologyAlreadyExists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
-  private static final String LOG_PREFIX = "[Technology_Persistence_Adapter] >>> ";
+  private static final String LOG_PREFIX = "[TECHNOLOGY_PERSISTENCE_ADAPTER] >>>";
 
   private final TechnologyRepository technologyRepository;
   private final TechnologyEntityMapper technologyEntityMapper;
@@ -40,7 +40,7 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
         .flatMap(
             exist -> {
               if (Boolean.TRUE.equals(exist)) {
-                log.info("{} Technology name: {} already exist", LOG_PREFIX, name);
+                log.error("{} Technology name: {} already exist", LOG_PREFIX, name);
                 return Mono.error(TechnologyAlreadyExists::new);
               }
               return Mono.empty();

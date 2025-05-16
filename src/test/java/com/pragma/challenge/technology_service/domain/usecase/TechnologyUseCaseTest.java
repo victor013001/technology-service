@@ -7,9 +7,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.pragma.challenge.technology_service.domain.exceptions.standard_exception.TechnologyAlreadyExists;
 import com.pragma.challenge.technology_service.domain.model.Technology;
 import com.pragma.challenge.technology_service.domain.spi.TechnologyPersistencePort;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.exceptions.standard_exception.TechnologyAlreadyExists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

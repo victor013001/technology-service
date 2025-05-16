@@ -1,11 +1,11 @@
 package com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.impl;
 
 import com.pragma.challenge.technology_service.domain.api.TechnologyServicePort;
+import com.pragma.challenge.technology_service.domain.enums.ServerResponses;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.TechnologyHandler;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyMapper;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.RequestValidator;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.ServerResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class TechnologyHandlerV1 implements TechnologyHandler {
-  private static final String LOG_PREFIX = "[Technology_Handler_V1] >>> ";
+  private static final String LOG_PREFIX = "[TECHNOLOGY_HANDLER_V1] >>>";
 
   private final TechnologyServicePort technologyServicePort;
   private final TechnologyMapper technologyMapper;

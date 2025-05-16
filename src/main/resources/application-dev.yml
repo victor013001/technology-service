@@ -12,15 +12,6 @@ spring:
     password: ${DB_PASSWORD}
 
 management:
-  tracing:
-    sampling:
-      probability: 0.0
-    baggage:
-      correlation:
-        fields:
-          - messageId
-          - x-message-id
-      remote-fields: messageId,x-message-id
   endpoints:
     web:
       exposure:
@@ -46,11 +37,30 @@ management:
       enabled: false
     refresh:
       enabled: false
+
+service:
+  base-url: baseUrl
+  timeout: 500
+
 resilience4j.circuitbreaker:
   circuit-breaker-aspect-order: 1
   configs:
     default:
       register-health-indicator: true
+  instances:
+    service:
+      base-config: default
+      failure-rate-threshold: 50
+      slow-call-rate-threshold: 50
+      slow-call-duration-threshold: 2s
+      sliding-window-size: 5
+      minimum-number-of-calls: 5
+      wait-duration-in-open-state: 25s
+      max-wait-duration-in-half-open-state: 5s
+      permitted-number-of-calls-in-half-open-state: 2
+      automatic-transition-from-open-to-half-open-enabled: false
+      record-exceptions: java.util.concurrent.TimeoutException
+
 resilience4j:
   retry:
     configs:
@@ -59,10 +69,22 @@ resilience4j:
         waitDuration: 2000ms
         enableExponentialBackoff: true
         exponentialBackoffMultiplier: 2.0
-        maxWaitDuration: 10000ms  # Duración máxima del backoff
-        initialInterval: 500ms    # Intervalo inicial para el backoff
+        maxWaitDuration: 10000ms
+        initialInterval: 500ms
+      instances:
+        serviceRetry:
+          maxAttempts: 5
+          waitDuration: 1000ms
+          enableExponentialBackoff: true
+          exponentialBackoffMultiplier: 1.5
+          maxWaitDuration: 10000ms
+          initialInterval: 500ms
   bulkhead:
     configs:
       default:
         maxConcurrentCalls: 10
         maxWaitDuration: 500ms
+    instances:
+      serviceBulkhead:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 1s

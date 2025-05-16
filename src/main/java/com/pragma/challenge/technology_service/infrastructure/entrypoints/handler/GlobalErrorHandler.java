@@ -1,9 +1,9 @@
 package com.pragma.challenge.technology_service.infrastructure.entrypoints.handler;
 
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.exceptions.StandardError;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.exceptions.StandardException;
+import com.pragma.challenge.technology_service.domain.enums.ServerResponses;
+import com.pragma.challenge.technology_service.domain.exceptions.StandardError;
+import com.pragma.challenge.technology_service.domain.exceptions.StandardException;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.DefaultServerResponseContext;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.ServerResponses;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +28,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
 
   @Override
   public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-    log.info(
+    log.error(
         "{} Exception {} caught. Caused by: {}",
         LOG_PREFIX,
         ex.getClass().getSimpleName(),
@@ -37,14 +38,15 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
       return writeExchangeResponse(
           exchange, standardException.getHttpStatus(), standardException.getStandardError());
     }
+    if (ex instanceof NoResourceFoundException) {
+      return writeExchangeResponse(
+          exchange, HttpStatus.NOT_FOUND, buildStandardError(ServerResponses.RESOURCE_NOT_FOUND));
+    }
 
     return writeExchangeResponse(
         exchange,
         ServerResponses.SERVER_ERROR.getHttpStatus(),
-        StandardError.builder()
-            .description(ServerResponses.SERVER_ERROR.getMessage())
-            .timestamp(LocalDateTime.now())
-            .build());
+        buildStandardError(ServerResponses.SERVER_ERROR));
   }
 
   private Mono<Void> writeExchangeResponse(
@@ -53,5 +55,12 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(standardError)
         .flatMap(serverResponse -> serverResponse.writeTo(exchange, serverResponseContext));
+  }
+
+  private StandardError buildStandardError(ServerResponses serverResponses) {
+    return StandardError.builder()
+        .description(serverResponses.getMessage())
+        .timestamp(LocalDateTime.now())
+        .build();
   }
 }
