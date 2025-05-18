@@ -27,7 +27,7 @@ class TechnologyUseCaseTest {
   @Test
   void shouldRegisterTechnologySuccessfully() {
     var technology = getTechnologyWithoutId();
-    when(technologyPersistencePort.validName(technology.name())).thenReturn(Mono.empty());
+    when(technologyPersistencePort.existsByName(technology.name())).thenReturn(Mono.empty());
     when(technologyPersistencePort.save(any(Technology.class)))
         .thenAnswer(
             invocationOnMock -> {
@@ -49,7 +49,7 @@ class TechnologyUseCaseTest {
   @Test
   void shouldReturnTechnologyAlreadyExists() {
     var technology = getTechnologyWithoutId();
-    when(technologyPersistencePort.validName(technology.name()))
+    when(technologyPersistencePort.existsByName(technology.name()))
         .thenReturn(Mono.error(TechnologyAlreadyExists::new));
 
     StepVerifier.create(technologyUseCase.registerTechnology(technology))

@@ -59,6 +59,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
 
   private StandardError buildStandardError(ServerResponses serverResponses) {
     return StandardError.builder()
+        .code(serverResponses.getCode())
         .description(serverResponses.getMessage())
         .timestamp(LocalDateTime.now())
         .build();

@@ -73,6 +73,8 @@ public class TechnologyRouterRestV1 {
   public RouterFunction<ServerResponse> routerFunction(TechnologyHandler technologyHandler) {
     return nest(
         path("/api/v1/technology"),
-        route(RequestPredicates.POST(""), technologyHandler::createTechnology));
+        route(RequestPredicates.POST(""), technologyHandler::createTechnology)
+            .andRoute(RequestPredicates.GET("/exists"), technologyHandler::technologiesExists)
+            .andRoute(RequestPredicates.POST("/profile"), technologyHandler::createRelation));
   }
 }
