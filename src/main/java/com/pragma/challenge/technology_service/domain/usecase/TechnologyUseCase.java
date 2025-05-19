@@ -4,6 +4,7 @@ import com.pragma.challenge.technology_service.domain.api.TechnologyServicePort;
 import com.pragma.challenge.technology_service.domain.exceptions.standard_exception.TechnologyAlreadyExists;
 import com.pragma.challenge.technology_service.domain.model.Technology;
 import com.pragma.challenge.technology_service.domain.model.TechnologyIds;
+import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
 import com.pragma.challenge.technology_service.domain.model.TechnologyProfile;
 import com.pragma.challenge.technology_service.domain.spi.TechnologyPersistencePort;
 import java.util.List;
@@ -63,5 +64,10 @@ public class TechnologyUseCase implements TechnologyServicePort {
         .flatMap(technologyPersistencePort::saveTechnologyProfile)
         .then()
         .as(transactionalOperator::transactional);
+  }
+
+  @Override
+  public Mono<List<TechnologyNoDescription>> getProfileTechnologies(long profileId) {
+    return technologyPersistencePort.findAllByProfileId(profileId);
   }
 }

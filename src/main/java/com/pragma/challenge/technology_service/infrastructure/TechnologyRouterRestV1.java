@@ -8,6 +8,7 @@ import com.pragma.challenge.technology_service.domain.exceptions.StandardError;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyProfileDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.TechnologyHandler;
+import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.Constants;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.SwaggerResponses;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,10 +47,7 @@ public class TechnologyRouterRestV1 {
                         content =
                             @Content(
                                 mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                schema =
-                                    @Schema(
-                                        implementation =
-                                            TechnologyDto.class))),
+                                schema = @Schema(implementation = TechnologyDto.class))),
                 responses = {
                   @ApiResponse(
                       responseCode = "201",
@@ -134,7 +132,7 @@ public class TechnologyRouterRestV1 {
         operation =
             @Operation(
                 operationId = "createRelation",
-                summary = "Create relation between profile and technology",
+                summary = "Create relation between profile and technology.",
                 requestBody =
                     @RequestBody(
                         required = true,
@@ -167,6 +165,48 @@ public class TechnologyRouterRestV1 {
                           @Content(
                               mediaType = MediaType.APPLICATION_JSON_VALUE,
                               schema = @Schema(implementation = StandardError.class)))
+                })),
+    @RouterOperation(
+        path = "/api/v1/technology",
+        method = RequestMethod.GET,
+        beanClass = TechnologyHandler.class,
+        beanMethod = "getTechnologiesByProfileId",
+        operation =
+            @Operation(
+                operationId = "getTechnologiesByProfileId",
+                summary = "Get technologies by profile id.",
+                parameters = {
+                  @Parameter(
+                      in = ParameterIn.QUERY,
+                      name = Constants.PROFILE_ID_PARAM,
+                      description = "Profile id to find technologies",
+                      required = true)
+                },
+                responses = {
+                  @ApiResponse(
+                      responseCode = "200",
+                      description = "Technologies list.",
+                      content =
+                          @Content(
+                              mediaType = MediaType.APPLICATION_JSON_VALUE,
+                              schema =
+                                  @Schema(
+                                      implementation =
+                                          SwaggerResponses.DefaultTechnologyNoDescriptionResponse.class))),
+                  @ApiResponse(
+                      responseCode = "400",
+                      description = "Unable to process the request with the given data.",
+                      content =
+                          @Content(
+                              mediaType = MediaType.APPLICATION_JSON_VALUE,
+                              schema = @Schema(implementation = StandardError.class))),
+                  @ApiResponse(
+                      responseCode = "500",
+                      description = "An unexpected error occurred on the server.",
+                      content =
+                          @Content(
+                              mediaType = MediaType.APPLICATION_JSON_VALUE,
+                              schema = @Schema(implementation = StandardError.class)))
                 }))
   })
   public RouterFunction<ServerResponse> routerFunction(TechnologyHandler technologyHandler) {
@@ -174,6 +214,7 @@ public class TechnologyRouterRestV1 {
         path("/api/v1/technology"),
         route(RequestPredicates.POST(""), technologyHandler::createTechnology)
             .andRoute(RequestPredicates.GET("/exists"), technologyHandler::technologiesExists)
-            .andRoute(RequestPredicates.POST("/profile"), technologyHandler::createRelation));
+            .andRoute(RequestPredicates.POST("/profile"), technologyHandler::createRelation)
+            .andRoute(RequestPredicates.GET(""), technologyHandler::getTechnologiesByProfileId));
   }
 }

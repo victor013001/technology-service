@@ -1,12 +1,14 @@
 package com.pragma.challenge.technology_service.infrastructure.adapters.persistence;
 
 import com.pragma.challenge.technology_service.domain.model.Technology;
+import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
 import com.pragma.challenge.technology_service.domain.model.TechnologyProfile;
 import com.pragma.challenge.technology_service.domain.spi.TechnologyPersistencePort;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.mapper.TechnologyEntityMapper;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.mapper.TechnologyProfileEntityMapper;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyProfileRepository;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -57,5 +59,13 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
     return technologyProfileRepository
         .save(technologyProfileEntityMapper.toEntity(technologyProfile))
         .map(technologyProfileEntityMapper::toModel);
+  }
+
+  @Override
+  public Mono<List<TechnologyNoDescription>> findAllByProfileId(long profileId) {
+    log.info("{} Finding technologies for profile with id: {}", LOG_PREFIX, profileId);
+    return technologyRepository.findAllByProfileId(profileId)
+        .map(technologyEntityMapper::toTechnologyNoDescription)
+        .collectList();
   }
 }

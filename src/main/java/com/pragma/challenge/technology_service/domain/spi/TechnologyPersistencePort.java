@@ -1,7 +1,9 @@
 package com.pragma.challenge.technology_service.domain.spi;
 
 import com.pragma.challenge.technology_service.domain.model.Technology;
+import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
 import com.pragma.challenge.technology_service.domain.model.TechnologyProfile;
+import java.util.List;
 import reactor.core.publisher.Mono;
 
 public interface TechnologyPersistencePort {
@@ -11,6 +13,7 @@ public interface TechnologyPersistencePort {
 
   Mono<Boolean> existsById(Long id);
 
-  Mono<TechnologyProfile> saveTechnologyProfile(
-      TechnologyProfile technologyProfile);
+  Mono<TechnologyProfile> saveTechnologyProfile(TechnologyProfile technologyProfile);
+
+  Mono<List<TechnologyNoDescription>> findAllByProfileId(long profileId);
 }
