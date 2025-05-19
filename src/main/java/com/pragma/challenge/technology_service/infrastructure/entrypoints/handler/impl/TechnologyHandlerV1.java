@@ -75,13 +75,13 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
                   "{} Checking if technologies with ids {} exist.",
                   LOG_PREFIX,
                   technologyIdsDto.ids());
-              return technologyServicePort
-                  .checkTechnologiesIds(technologyIdsMapper.toTechnologyIds(technologyIdsDto))
-                  .doOnSuccess(exists -> log.info("{} All technology ids were found.", LOG_PREFIX));
+              return technologyServicePort.checkTechnologiesIds(
+                  technologyIdsMapper.toTechnologyIds(technologyIdsDto));
             })
-        .then(
-            ServerResponse.status(HttpStatus.OK)
-                .bodyValue(defaultServerResponseMapper.toResponse(Boolean.TRUE)));
+        .flatMap(
+            exists ->
+                ServerResponse.status(HttpStatus.OK)
+                    .bodyValue(defaultServerResponseMapper.toResponse(exists)));
   }
 
   @Override

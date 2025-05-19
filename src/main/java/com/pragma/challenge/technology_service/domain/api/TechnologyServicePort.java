@@ -9,8 +9,7 @@ import reactor.core.publisher.Mono;
 public interface TechnologyServicePort {
   Mono<Technology> registerTechnology(Technology technology);
 
-  Mono<Void> checkTechnologiesIds(TechnologyIds technologyIdsDto);
+  Mono<Boolean> checkTechnologiesIds(TechnologyIds technologyIdsDto);
 
-  Mono<Void> registerTechnologyProfileRelation(
-      List<TechnologyProfile> technologyProfiles);
+  Mono<Void> registerTechnologyProfileRelation(List<TechnologyProfile> technologyProfiles);
 }
