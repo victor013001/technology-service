@@ -5,6 +5,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.n
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import com.pragma.challenge.technology_service.domain.exceptions.StandardError;
+import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyProfileDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.TechnologyHandler;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.SwaggerResponses;
@@ -48,7 +49,7 @@ public class TechnologyRouterRestV1 {
                                 schema =
                                     @Schema(
                                         implementation =
-                                            SwaggerResponses.DefaultTechnologyDtoResponse.class))),
+                                            TechnologyDto.class))),
                 responses = {
                   @ApiResponse(
                       responseCode = "201",

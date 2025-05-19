@@ -24,7 +24,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @Import(TestcontainersConfiguration.class)
 public class TechnologyRouterRestIT {
 
-  private final String BASE_URL = "/api/v1/technology";
+  private final String BASE_PATH = "/api/v1/technology";
 
   @Autowired WebTestClient webTestClient;
   @Autowired TechnologyRepository technologyRepository;
@@ -50,7 +50,7 @@ public class TechnologyRouterRestIT {
   void createTechnology() {
     webTestClient
         .post()
-        .uri(BASE_URL)
+        .uri(BASE_PATH)
         .bodyValue(getTechnologyDto())
         .exchange()
         .expectStatus()
@@ -68,7 +68,7 @@ public class TechnologyRouterRestIT {
   void createTechnologyBadRequest() {
     webTestClient
         .post()
-        .uri(BASE_URL)
+        .uri(BASE_PATH)
         .bodyValue(getInvalidTechnologyDto())
         .exchange()
         .expectStatus()
