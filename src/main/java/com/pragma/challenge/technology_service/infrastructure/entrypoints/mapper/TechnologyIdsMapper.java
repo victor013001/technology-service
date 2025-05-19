@@ -27,8 +27,6 @@ public interface TechnologyIdsMapper {
 
   @Mapping(source = "list", target = "list", qualifiedByName = "parseLong")
   default List<Long> stringListToLongList(List<String> list) {
-    return list.stream()
-        .map(this::parseLong)
-        .toList();
+    return list.stream().map(this::parseLong).toList();
   }
 }

@@ -1,6 +1,7 @@
 package com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.impl;
 
 import com.pragma.challenge.technology_service.domain.api.TechnologyServicePort;
+import com.pragma.challenge.technology_service.domain.constants.Constants;
 import com.pragma.challenge.technology_service.domain.enums.ServerResponses;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyIdsRequest;
@@ -104,5 +105,18 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
                 .bodyValue(
                     defaultServerResponseMapper.toResponse(
                         ServerResponses.TECHNOLOGY_PROFILE_CREATED.getMessage())));
+  }
+
+  @Override
+  public Mono<ServerResponse> getTechnologiesByProfileId(ServerRequest request) {
+    long profileId =
+        requestValidator.toLong(request.queryParam(Constants.PROFILE_ID_PARAM).orElseThrow());
+    log.info("{} Getting technologies for profile with id: {}", LOG_PREFIX, profileId);
+    return technologyServicePort
+        .getProfileTechnologies(profileId)
+        .flatMap(
+            technologies ->
+                ServerResponse.status(HttpStatus.OK)
+                    .bodyValue(defaultServerResponseMapper.toResponse(technologies)));
   }
 }

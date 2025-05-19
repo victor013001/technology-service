@@ -10,6 +10,6 @@ import reactor.core.publisher.Mono;
 public interface TechnologyProfileRepository
     extends ReactiveCrudRepository<TechnologyProfileEntity, Long> {
   @Query(
-      "SELECT COUNT(*) > 0 FROM profile_technology WHERE technology_id = :technologyId AND profile_id = :profileId")
+      "SELECT COUNT(*) > 0 FROM technology_profile WHERE technology_id = :technologyId AND profile_id = :profileId")
   Mono<Boolean> existByTechnologyIdAndProfileId(Long technologyId, Long profileId);
 }

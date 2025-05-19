@@ -13,8 +13,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @Table(name = "technology")
 public class TechnologyEntity {
-  @Id
-  private Long id;
+  @Id private Long id;
   private String name;
   private String description;
 }

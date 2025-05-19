@@ -1,5 +1,6 @@
 package com.pragma.challenge.technology_service.infrastructure.entrypoints.util;
 
+import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,5 +23,12 @@ public final class SwaggerResponses {
   @AllArgsConstructor
   public static class DefaultMessageResponse {
     private String data;
+  }
+
+  @Data
+  @Schema(name = "DefaultTechnologyNoDescriptionResponse")
+  @AllArgsConstructor
+  public static class DefaultTechnologyNoDescriptionResponse {
+    private TechnologyNoDescription data;
   }
 }

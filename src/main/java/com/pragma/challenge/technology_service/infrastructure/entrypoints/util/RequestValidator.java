@@ -27,4 +27,12 @@ public class RequestValidator {
     }
     return Mono.just(requestDto);
   }
+
+  public long toLong(String value) {
+    try {
+      return Long.parseLong(value);
+    } catch (NumberFormatException e) {
+      throw new BadRequest();
+    }
+  }
 }

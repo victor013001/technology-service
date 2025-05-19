@@ -4,9 +4,9 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
+import com.pragma.challenge.technology_service.domain.constants.Constants;
 import com.pragma.challenge.technology_service.domain.exceptions.StandardError;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyProfileDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.TechnologyHandler;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.SwaggerResponses;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,14 +46,11 @@ public class TechnologyRouterRestV1 {
                         content =
                             @Content(
                                 mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                schema =
-                                    @Schema(
-                                        implementation =
-                                            TechnologyDto.class))),
+                                schema = @Schema(implementation = TechnologyDto.class))),
                 responses = {
                   @ApiResponse(
                       responseCode = "201",
-                      description = "Technology created successfully.",
+                      description = Constants.TECHNOLOGY_CREATED_MSG,
                       content =
                           @Content(
                               mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -63,21 +60,21 @@ public class TechnologyRouterRestV1 {
                                           SwaggerResponses.DefaultMessageResponse.class))),
                   @ApiResponse(
                       responseCode = "400",
-                      description = "Unable to process the request with the given data.",
+                      description = Constants.BAD_REQUEST_MSG,
                       content =
                           @Content(
                               mediaType = MediaType.APPLICATION_JSON_VALUE,
                               schema = @Schema(implementation = StandardError.class))),
                   @ApiResponse(
                       responseCode = "409",
-                      description = "Conflict with the given data.",
+                      description = Constants.TECHNOLOGY_ALREADY_EXISTS_MSG,
                       content =
                           @Content(
                               mediaType = MediaType.APPLICATION_JSON_VALUE,
                               schema = @Schema(implementation = StandardError.class))),
                   @ApiResponse(
                       responseCode = "500",
-                      description = "An unexpected error occurred on the server.",
+                      description = Constants.SERVER_ERROR_MSG,
                       content =
                           @Content(
                               mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -113,56 +110,14 @@ public class TechnologyRouterRestV1 {
                                           SwaggerResponses.DefaultBooleanResponse.class))),
                   @ApiResponse(
                       responseCode = "400",
-                      description = "Unable to process the request with the given data.",
+                      description = Constants.BAD_REQUEST_MSG,
                       content =
                           @Content(
                               mediaType = MediaType.APPLICATION_JSON_VALUE,
                               schema = @Schema(implementation = StandardError.class))),
                   @ApiResponse(
                       responseCode = "500",
-                      description = "An unexpected error occurred on the server.",
-                      content =
-                          @Content(
-                              mediaType = MediaType.APPLICATION_JSON_VALUE,
-                              schema = @Schema(implementation = StandardError.class)))
-                })),
-    @RouterOperation(
-        path = "/api/v1/technology/profile",
-        method = RequestMethod.POST,
-        beanClass = TechnologyHandler.class,
-        beanMethod = "createRelation",
-        operation =
-            @Operation(
-                operationId = "createRelation",
-                summary = "Create relation between profile and technology",
-                requestBody =
-                    @RequestBody(
-                        required = true,
-                        content =
-                            @Content(
-                                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                schema = @Schema(implementation = TechnologyProfileDto.class))),
-                responses = {
-                  @ApiResponse(
-                      responseCode = "201",
-                      description = "Relations created successfully.",
-                      content =
-                          @Content(
-                              mediaType = MediaType.APPLICATION_JSON_VALUE,
-                              schema =
-                                  @Schema(
-                                      implementation =
-                                          SwaggerResponses.DefaultMessageResponse.class))),
-                  @ApiResponse(
-                      responseCode = "400",
-                      description = "Unable to process the request with the given data.",
-                      content =
-                          @Content(
-                              mediaType = MediaType.APPLICATION_JSON_VALUE,
-                              schema = @Schema(implementation = StandardError.class))),
-                  @ApiResponse(
-                      responseCode = "500",
-                      description = "An unexpected error occurred on the server.",
+                      description = Constants.SERVER_ERROR_MSG,
                       content =
                           @Content(
                               mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -174,6 +129,7 @@ public class TechnologyRouterRestV1 {
         path("/api/v1/technology"),
         route(RequestPredicates.POST(""), technologyHandler::createTechnology)
             .andRoute(RequestPredicates.GET("/exists"), technologyHandler::technologiesExists)
-            .andRoute(RequestPredicates.POST("/profile"), technologyHandler::createRelation));
+            .andRoute(RequestPredicates.POST("/profile"), technologyHandler::createRelation)
+            .andRoute(RequestPredicates.GET(""), technologyHandler::getTechnologiesByProfileId));
   }
 }

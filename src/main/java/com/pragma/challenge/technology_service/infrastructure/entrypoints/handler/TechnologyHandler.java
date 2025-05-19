@@ -10,4 +10,6 @@ public interface TechnologyHandler {
   Mono<ServerResponse> technologiesExists(ServerRequest request);
 
   Mono<ServerResponse> createRelation(ServerRequest request);
+
+  Mono<ServerResponse> getTechnologiesByProfileId(ServerRequest request);
 }
