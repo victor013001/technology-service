@@ -29,7 +29,7 @@ public class RequestValidator {
   }
 
   public long toLong(String value) {
-    try{
+    try {
       return Long.parseLong(value);
     } catch (NumberFormatException e) {
       throw new BadRequest();

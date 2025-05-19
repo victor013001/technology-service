@@ -64,7 +64,8 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
   @Override
   public Mono<List<TechnologyNoDescription>> findAllByProfileId(long profileId) {
     log.info("{} Finding technologies for profile with id: {}", LOG_PREFIX, profileId);
-    return technologyRepository.findAllByProfileId(profileId)
+    return technologyRepository
+        .findAllByProfileId(profileId)
         .map(technologyEntityMapper::toTechnologyNoDescription)
         .collectList();
   }

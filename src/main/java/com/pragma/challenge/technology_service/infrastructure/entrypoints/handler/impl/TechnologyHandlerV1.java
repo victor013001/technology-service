@@ -1,6 +1,7 @@
 package com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.impl;
 
 import com.pragma.challenge.technology_service.domain.api.TechnologyServicePort;
+import com.pragma.challenge.technology_service.domain.constants.Constants;
 import com.pragma.challenge.technology_service.domain.enums.ServerResponses;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyIdsRequest;
@@ -10,7 +11,6 @@ import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyIdsMapper;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyMapper;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyProfileMapper;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.Constants;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.RequestValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

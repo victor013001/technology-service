@@ -14,10 +14,11 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @Table(name = "technology_profile")
 public class TechnologyProfileEntity {
-  @Id
-  private Long id;
+  @Id private Long id;
+
   @Column("technology_id")
   private Long technologyId;
+
   @Column("profile_id")
   private Long profileId;
 }

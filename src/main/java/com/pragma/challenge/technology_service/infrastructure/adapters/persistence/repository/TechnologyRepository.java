@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 public interface TechnologyRepository extends ReactiveCrudRepository<TechnologyEntity, Long> {
   Mono<Boolean> existsByName(String name);
 
-  @Query("SELECT t.* FROM technology t JOIN technology_profile pt ON pt.technology_id = t.id WHERE pt.profile_id = :profileId")
+  @Query(
+      "SELECT t.* FROM technology t JOIN technology_profile pt ON pt.technology_id = t.id WHERE pt.profile_id = :profileId")
   Flux<TechnologyEntity> findAllByProfileId(Long profileId);
 }
