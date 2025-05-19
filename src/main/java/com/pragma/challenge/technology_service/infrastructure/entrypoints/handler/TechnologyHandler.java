@@ -6,4 +6,8 @@ import reactor.core.publisher.Mono;
 
 public interface TechnologyHandler {
   Mono<ServerResponse> createTechnology(ServerRequest request);
+
+  Mono<ServerResponse> technologiesExists(ServerRequest request);
+
+  Mono<ServerResponse> createRelation(ServerRequest request);
 }

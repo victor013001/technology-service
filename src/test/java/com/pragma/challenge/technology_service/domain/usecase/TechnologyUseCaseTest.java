@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -23,11 +24,14 @@ class TechnologyUseCaseTest {
   @InjectMocks TechnologyUseCase technologyUseCase;
 
   @Mock TechnologyPersistencePort technologyPersistencePort;
+  @Mock TransactionalOperator transactionalOperator;
 
   @Test
   void shouldRegisterTechnologySuccessfully() {
     var technology = getTechnologyWithoutId();
-    when(technologyPersistencePort.validName(technology.name())).thenReturn(Mono.empty());
+    when(transactionalOperator.transactional(any(Mono.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(technologyPersistencePort.existsByName(technology.name())).thenReturn(Mono.empty());
     when(technologyPersistencePort.save(any(Technology.class)))
         .thenAnswer(
             invocationOnMock -> {
@@ -49,7 +53,9 @@ class TechnologyUseCaseTest {
   @Test
   void shouldReturnTechnologyAlreadyExists() {
     var technology = getTechnologyWithoutId();
-    when(technologyPersistencePort.validName(technology.name()))
+    when(transactionalOperator.transactional(any(Mono.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(technologyPersistencePort.existsByName(technology.name()))
         .thenReturn(Mono.error(TechnologyAlreadyExists::new));
 
     StepVerifier.create(technologyUseCase.registerTechnology(technology))

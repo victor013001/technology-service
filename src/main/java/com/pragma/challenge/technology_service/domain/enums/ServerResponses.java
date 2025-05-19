@@ -16,9 +16,11 @@ public enum ServerResponses {
       HttpStatus.INTERNAL_SERVER_ERROR,
       "An unexpected server error occurred. Please try again later."),
   RESOURCE_NOT_FOUND("E002", HttpStatus.NOT_FOUND, "The requested resource was not found."),
-  TECHNOLOGY_CREATED("E003", HttpStatus.CREATED, "The technology was created successfully."),
+  TECHNOLOGY_CREATED("", HttpStatus.CREATED, "The technology was created successfully."),
   TECHNOLOGY_ALREADY_EXISTS(
-      "E004", HttpStatus.CONFLICT, "The technology could not be created due to a data conflict.");
+      "E003", HttpStatus.CONFLICT, "The technology could not be created due to a data conflict."),
+  TECHNOLOGY_NOT_FOUND("E004", HttpStatus.NOT_FOUND, "The technology provided was not found."),
+  TECHNOLOGY_PROFILE_CREATED("", HttpStatus.CREATED, "Relations created successfully.");
 
   private final String code;
   private final HttpStatus httpStatus;

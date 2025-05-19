@@ -1,14 +1,15 @@
 package com.pragma.challenge.technology_service.infrastructure.adapters.persistence;
 
-import com.pragma.challenge.technology_service.domain.exceptions.standard_exception.TechnologyAlreadyExists;
 import com.pragma.challenge.technology_service.domain.model.Technology;
+import com.pragma.challenge.technology_service.domain.model.TechnologyProfile;
 import com.pragma.challenge.technology_service.domain.spi.TechnologyPersistencePort;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.mapper.TechnologyEntityMapper;
+import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.mapper.TechnologyProfileEntityMapper;
+import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyProfileRepository;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -19,9 +20,10 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
 
   private final TechnologyRepository technologyRepository;
   private final TechnologyEntityMapper technologyEntityMapper;
+  private final TechnologyProfileRepository technologyProfileRepository;
+  private final TechnologyProfileEntityMapper technologyProfileEntityMapper;
 
   @Override
-  @Transactional
   public Mono<Technology> save(Technology technology) {
     log.info(
         "{} Saving technology with name: {} and description: {}.",
@@ -34,16 +36,26 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
   }
 
   @Override
-  public Mono<Void> validName(String name) {
-    return technologyRepository
-        .existsByName(name)
-        .flatMap(
-            exist -> {
-              if (Boolean.TRUE.equals(exist)) {
-                log.error("{} Technology name: {} already exist", LOG_PREFIX, name);
-                return Mono.error(TechnologyAlreadyExists::new);
-              }
-              return Mono.empty();
-            });
+  public Mono<Boolean> existsByName(String name) {
+    log.info("{} Checking if technology with name: {} exists.", LOG_PREFIX, name);
+    return technologyRepository.existsByName(name);
+  }
+
+  @Override
+  public Mono<Boolean> existsById(Long id) {
+    log.info("{} Checking if technology with id: {} exists.", LOG_PREFIX, id);
+    return technologyRepository.existsById(id);
+  }
+
+  @Override
+  public Mono<TechnologyProfile> saveTechnologyProfile(TechnologyProfile technologyProfile) {
+    log.info(
+        "{} Saving relation with technology id: {} and profile id: {}",
+        LOG_PREFIX,
+        technologyProfile.technologyId(),
+        technologyProfile.technologyId());
+    return technologyProfileRepository
+        .save(technologyProfileEntityMapper.toEntity(technologyProfile))
+        .map(technologyProfileEntityMapper::toModel);
   }
 }
