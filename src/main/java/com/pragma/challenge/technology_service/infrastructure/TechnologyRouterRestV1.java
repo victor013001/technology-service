@@ -122,7 +122,50 @@ public class TechnologyRouterRestV1 {
                           @Content(
                               mediaType = MediaType.APPLICATION_JSON_VALUE,
                               schema = @Schema(implementation = StandardError.class)))
-                }))
+                })),
+      @RouterOperation(
+          path = "/api/v1/technology",
+          method = RequestMethod.DELETE,
+          beanClass = TechnologyHandler.class,
+          beanMethod = "deleteTechnologies",
+          operation =
+          @Operation(
+              operationId = "deleteTechnologies",
+              summary = "Delete technologies by profile ids",
+              parameters = {
+                  @Parameter(
+                      in = ParameterIn.QUERY,
+                      name = "profileId",
+                      description = "Profile IDs to delete technologies",
+                      required = true,
+                      array = @ArraySchema(schema = @Schema(type = "string", example = "1")))
+              },
+              responses = {
+                  @ApiResponse(
+                      responseCode = "200",
+                      description = Constants.TECHNOLOGIES_DELETED_MSG,
+                      content =
+                      @Content(
+                          mediaType = MediaType.APPLICATION_JSON_VALUE,
+                          schema =
+                          @Schema(
+                              implementation =
+                                  SwaggerResponses.DefaultBooleanResponse.class))),
+                  @ApiResponse(
+                      responseCode = "400",
+                      description = Constants.BAD_REQUEST_MSG,
+                      content =
+                      @Content(
+                          mediaType = MediaType.APPLICATION_JSON_VALUE,
+                          schema = @Schema(implementation = StandardError.class))),
+                  @ApiResponse(
+                      responseCode = "500",
+                      description = Constants.SERVER_ERROR_MSG,
+                      content =
+                      @Content(
+                          mediaType = MediaType.APPLICATION_JSON_VALUE,
+                          schema = @Schema(implementation = StandardError.class)))
+              })),
   })
   public RouterFunction<ServerResponse> routerFunction(TechnologyHandler technologyHandler) {
     return nest(
@@ -130,6 +173,7 @@ public class TechnologyRouterRestV1 {
         route(RequestPredicates.POST(""), technologyHandler::createTechnology)
             .andRoute(RequestPredicates.GET("/exists"), technologyHandler::technologiesExists)
             .andRoute(RequestPredicates.POST("/profile"), technologyHandler::createRelation)
-            .andRoute(RequestPredicates.GET(""), technologyHandler::getTechnologiesByProfileId));
+            .andRoute(RequestPredicates.GET(""), technologyHandler::getTechnologiesByProfileId)
+            .andRoute(RequestPredicates.DELETE(""), technologyHandler::deleteTechnologies));
   }
 }

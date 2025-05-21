@@ -2,6 +2,7 @@ package com.pragma.challenge.technology_service.domain.usecase;
 
 import com.pragma.challenge.technology_service.domain.api.TechnologyServicePort;
 import com.pragma.challenge.technology_service.domain.exceptions.standard_exception.TechnologyAlreadyExists;
+import com.pragma.challenge.technology_service.domain.model.ProfileIds;
 import com.pragma.challenge.technology_service.domain.model.Technology;
 import com.pragma.challenge.technology_service.domain.model.TechnologyIds;
 import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
@@ -69,5 +70,20 @@ public class TechnologyUseCase implements TechnologyServicePort {
   @Override
   public Mono<List<TechnologyNoDescription>> getProfileTechnologies(long profileId) {
     return technologyPersistencePort.findAllByProfileId(profileId);
+  }
+
+  @Override
+  public Mono<Void> deleteProfilesTechnologies(ProfileIds profileIds) {
+    return Flux.fromIterable(profileIds.ids())
+        .flatMap(
+            profileId ->
+                technologyPersistencePort
+                    .findTechnologyIdsByOnlyProfileId(profileId)
+                    .flatMap(
+                        technologyId ->
+                            technologyPersistencePort
+                                .deleteRelationByProfileId(profileId)
+                                .then(technologyPersistencePort.deleteTechnologiesByIds(technologyId))))
+        .then();
   }
 }
