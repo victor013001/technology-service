@@ -1,5 +1,6 @@
 package com.pragma.challenge.technology_service.domain.api;
 
+import com.pragma.challenge.technology_service.domain.model.ProfileIds;
 import com.pragma.challenge.technology_service.domain.model.Technology;
 import com.pragma.challenge.technology_service.domain.model.TechnologyIds;
 import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
@@ -15,4 +16,6 @@ public interface TechnologyServicePort {
   Mono<Void> registerTechnologyProfileRelation(List<TechnologyProfile> technologyProfiles);
 
   Mono<List<TechnologyNoDescription>> getProfileTechnologies(long profileId);
+
+  Mono<Void> deleteProfilesTechnologies(ProfileIds profileIds);
 }

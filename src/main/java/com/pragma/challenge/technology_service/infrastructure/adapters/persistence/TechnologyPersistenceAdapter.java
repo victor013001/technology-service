@@ -55,7 +55,7 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
         "{} Saving relation with technology id: {} and profile id: {}",
         LOG_PREFIX,
         technologyProfile.technologyId(),
-        technologyProfile.technologyId());
+        technologyProfile.profileId());
     return technologyProfileRepository
         .save(technologyProfileEntityMapper.toEntity(technologyProfile))
         .map(technologyProfileEntityMapper::toModel);
@@ -68,5 +68,26 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
         .findAllByProfileId(profileId)
         .map(technologyEntityMapper::toTechnologyNoDescription)
         .collectList();
+  }
+
+  @Override
+  public Mono<List<Long>> findTechnologyIdsByOnlyProfileId(Long profileId) {
+    log.info(
+        "{} Finding technology ids that have a relation with the profile id: {}",
+        LOG_PREFIX,
+        profileId);
+    return technologyProfileRepository.findProfileIdsByOnlyProfileId(profileId).collectList();
+  }
+
+  @Override
+  public Mono<Void> deleteRelationByProfileId(Long profileId) {
+    log.info("{} Deleting relation where profile id: {}", LOG_PREFIX, profileId);
+    return technologyProfileRepository.deleteByProfileId(profileId);
+  }
+
+  @Override
+  public Mono<Void> deleteTechnologiesByIds(List<Long> technologyIds) {
+    log.info("{} Deleting technologies with ids: {}", LOG_PREFIX, technologyIds);
+    return technologyRepository.deleteTechnologiesByIds(technologyIds);
   }
 }

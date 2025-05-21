@@ -16,4 +16,10 @@ public interface TechnologyPersistencePort {
   Mono<TechnologyProfile> saveTechnologyProfile(TechnologyProfile technologyProfile);
 
   Mono<List<TechnologyNoDescription>> findAllByProfileId(long profileId);
+
+  Mono<List<Long>> findTechnologyIdsByOnlyProfileId(Long profileId);
+
+  Mono<Void> deleteRelationByProfileId(Long profileId);
+
+  Mono<Void> deleteTechnologiesByIds(List<Long> technologyIds);
 }

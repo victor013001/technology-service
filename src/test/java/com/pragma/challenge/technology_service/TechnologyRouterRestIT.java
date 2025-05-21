@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.pragma.challenge.technology_service.domain.constants.Constants;
 import com.pragma.challenge.technology_service.domain.enums.ServerResponses;
 import com.pragma.challenge.technology_service.domain.exceptions.StandardError;
 import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
@@ -15,6 +16,7 @@ import com.pragma.challenge.technology_service.infrastructure.adapters.persisten
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyRepository;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.DefaultServerResponse;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +61,9 @@ public class TechnologyRouterRestIT {
         .saveAll(
             List.of(
                 TechnologyProfileEntity.builder().profileId(1L).technologyId(1L).build(),
-                TechnologyProfileEntity.builder().profileId(1L).technologyId(2L).build()))
+                TechnologyProfileEntity.builder().profileId(1L).technologyId(2L).build(),
+                TechnologyProfileEntity.builder().profileId(2L).technologyId(2L).build(),
+                TechnologyProfileEntity.builder().profileId(2L).technologyId(3L).build()))
         .blockLast();
   }
 
@@ -72,7 +76,7 @@ public class TechnologyRouterRestIT {
         .exchange()
         .expectStatus()
         .isCreated()
-        .expectBody(DefaultServerResponse.class)
+        .expectBody(new ParameterizedTypeReference<DefaultServerResponse<String>>() {})
         .consumeWith(
             exchangeResult -> {
               var response = exchangeResult.getResponseBody();
@@ -132,7 +136,27 @@ public class TechnologyRouterRestIT {
               var response = exchangeResult.getResponseBody();
               assertNotNull(response);
               assertEquals(2, response.data().size());
-              System.out.println(response.data());
+            });
+  }
+
+  @Test
+  void deleteByProfileId() {
+    webTestClient
+        .delete()
+        .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("profileId", "1").build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(new ParameterizedTypeReference<DefaultServerResponse<String>>() {})
+        .consumeWith(
+            exchangeResult -> {
+              var response = exchangeResult.getResponseBody();
+              assertNotNull(response);
+              assertEquals(Constants.TECHNOLOGIES_DELETED_MSG, response.data());
+              assertEquals(
+                  2,
+                  Objects.requireNonNull(technologyRepository.findAll().collectList().block())
+                      .size());
             });
   }
 }

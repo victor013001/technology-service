@@ -3,11 +3,13 @@ package com.pragma.challenge.technology_service.infrastructure.entrypoints.handl
 import com.pragma.challenge.technology_service.domain.api.TechnologyServicePort;
 import com.pragma.challenge.technology_service.domain.constants.Constants;
 import com.pragma.challenge.technology_service.domain.enums.ServerResponses;
+import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.ProfileIdsRequest;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyIdsRequest;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyProfileDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.TechnologyHandler;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.DefaultServerResponseMapper;
+import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.ProfileIdsMapper;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyIdsMapper;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyMapper;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyProfileMapper;
@@ -32,6 +34,7 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
   private final TechnologyIdsMapper technologyIdsMapper;
   private final TechnologyProfileMapper technologyProfileMapper;
   private final DefaultServerResponseMapper defaultServerResponseMapper;
+  private final ProfileIdsMapper profileIdsMapper;
 
   @Override
   public Mono<ServerResponse> createTechnology(ServerRequest request) {
@@ -118,5 +121,27 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
             technologies ->
                 ServerResponse.status(HttpStatus.OK)
                     .bodyValue(defaultServerResponseMapper.toResponse(technologies)));
+  }
+
+  @Override
+  public Mono<ServerResponse> deleteTechnologies(ServerRequest request) {
+    ProfileIdsRequest idsRequest =
+        new ProfileIdsRequest(request.queryParams().get(Constants.PROFILE_ID_PARAM));
+    return requestValidator
+        .validate(idsRequest)
+        .flatMap(
+            profileIdsRequest -> {
+              log.info(
+                  "{} Deleting technologies for profiles ids: {}.",
+                  LOG_PREFIX,
+                  profileIdsRequest.ids());
+              return technologyServicePort.deleteProfilesTechnologies(
+                  profileIdsMapper.toTechnologyIds(profileIdsRequest));
+            })
+        .then(
+            ServerResponse.status(ServerResponses.TECHNOLOGIES_DELETED.getHttpStatus())
+                .bodyValue(
+                    defaultServerResponseMapper.toResponse(
+                        ServerResponses.TECHNOLOGIES_DELETED.getMessage())));
   }
 }

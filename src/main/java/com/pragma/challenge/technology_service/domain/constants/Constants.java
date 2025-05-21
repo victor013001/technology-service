@@ -12,4 +12,5 @@ public class Constants {
   public static final String TECHNOLOGY_ALREADY_EXISTS_MSG = "The technology could not be created due to a data conflict.";
   public static final String TECHNOLOGY_NOT_FOUND_MSG = "The technology provided was not found.";
   public static final String TECHNOLOGY_PROFILE_CREATED_MSG = "Relations created successfully.";
+  public static final String TECHNOLOGIES_DELETED_MSG = "The technologies were deleted successfully.";
 }

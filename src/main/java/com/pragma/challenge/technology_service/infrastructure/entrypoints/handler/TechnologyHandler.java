@@ -12,4 +12,6 @@ public interface TechnologyHandler {
   Mono<ServerResponse> createRelation(ServerRequest request);
 
   Mono<ServerResponse> getTechnologiesByProfileId(ServerRequest request);
+
+  Mono<ServerResponse> deleteTechnologies(ServerRequest request);
 }
