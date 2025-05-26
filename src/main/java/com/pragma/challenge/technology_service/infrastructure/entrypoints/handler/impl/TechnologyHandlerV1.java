@@ -1,8 +1,13 @@
 package com.pragma.challenge.technology_service.infrastructure.entrypoints.handler.impl;
 
+import static com.pragma.challenge.technology_service.infrastructure.entrypoints.util.ResponseUtil.buildResponse;
+import static com.pragma.challenge.technology_service.infrastructure.entrypoints.util.ResponseUtil.buildStandardError;
+
 import com.pragma.challenge.technology_service.domain.api.TechnologyServicePort;
 import com.pragma.challenge.technology_service.domain.constants.Constants;
 import com.pragma.challenge.technology_service.domain.enums.ServerResponses;
+import com.pragma.challenge.technology_service.domain.exceptions.StandardException;
+import com.pragma.challenge.technology_service.domain.exceptions.standard_exception.BadRequest;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.ProfileIdsRequest;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyDto;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.TechnologyIdsRequest;
@@ -13,7 +18,9 @@ import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyIdsMapper;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyMapper;
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.mapper.TechnologyProfileMapper;
-import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.RequestValidator;
+import com.pragma.challenge.technology_service.infrastructure.entrypoints.util.ParseUtil;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,7 +37,6 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
 
   private final TechnologyServicePort technologyServicePort;
   private final TechnologyMapper technologyMapper;
-  private final RequestValidator requestValidator;
   private final TechnologyIdsMapper technologyIdsMapper;
   private final TechnologyProfileMapper technologyProfileMapper;
   private final DefaultServerResponseMapper defaultServerResponseMapper;
@@ -40,7 +46,7 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
   public Mono<ServerResponse> createTechnology(ServerRequest request) {
     return request
         .bodyToMono(TechnologyDto.class)
-        .flatMap(requestValidator::validate)
+        .switchIfEmpty(Mono.error(BadRequest::new))
         .flatMap(
             technologyDto -> {
               log.info(
@@ -61,10 +67,14 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
             })
         .flatMap(
             ignore ->
-                ServerResponse.status(ServerResponses.TECHNOLOGY_CREATED.getHttpStatus())
-                    .bodyValue(
-                        defaultServerResponseMapper.toResponse(
-                            ServerResponses.TECHNOLOGY_CREATED.getMessage())));
+                buildResponse(
+                    ServerResponses.TECHNOLOGY_CREATED.getHttpStatus(),
+                    ServerResponses.TECHNOLOGY_CREATED.getMessage(),
+                    null,
+                    defaultServerResponseMapper))
+        .doOnError(logErrorHandler())
+        .onErrorResume(StandardException.class, standardErrorHandler())
+        .onErrorResume(genericErrorHandler());
   }
 
   @Override
@@ -72,7 +82,6 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
     TechnologyIdsRequest technologyIdsRequest =
         new TechnologyIdsRequest(request.queryParams().get("id"));
     return Mono.just(technologyIdsMapper.toTechnologyIdsDto(technologyIdsRequest))
-        .flatMap(requestValidator::validate)
         .flatMap(
             technologyIdsDto -> {
               log.info(
@@ -82,17 +91,16 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
               return technologyServicePort.checkTechnologiesIds(
                   technologyIdsMapper.toTechnologyIds(technologyIdsDto));
             })
-        .flatMap(
-            exists ->
-                ServerResponse.status(HttpStatus.OK)
-                    .bodyValue(defaultServerResponseMapper.toResponse(exists)));
+        .flatMap(exists -> buildResponse(HttpStatus.OK, exists, null, defaultServerResponseMapper))
+        .doOnError(logErrorHandler())
+        .onErrorResume(StandardException.class, standardErrorHandler())
+        .onErrorResume(genericErrorHandler());
   }
 
   @Override
   public Mono<ServerResponse> createRelation(ServerRequest request) {
     return request
         .bodyToMono(TechnologyProfileDto.class)
-        .flatMap(requestValidator::validate)
         .flatMap(
             technologyProfileDto -> {
               log.info("{} Creating technology profile relations", LOG_PREFIX);
@@ -104,31 +112,35 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
                       technology -> log.info("{} Relations created successfully.", LOG_PREFIX));
             })
         .then(
-            ServerResponse.status(ServerResponses.TECHNOLOGY_PROFILE_CREATED.getHttpStatus())
-                .bodyValue(
-                    defaultServerResponseMapper.toResponse(
-                        ServerResponses.TECHNOLOGY_PROFILE_CREATED.getMessage())));
+            buildResponse(
+                ServerResponses.TECHNOLOGY_PROFILE_CREATED.getHttpStatus(),
+                ServerResponses.TECHNOLOGY_PROFILE_CREATED.getMessage(),
+                null,
+                defaultServerResponseMapper))
+        .doOnError(logErrorHandler())
+        .onErrorResume(StandardException.class, standardErrorHandler())
+        .onErrorResume(genericErrorHandler());
   }
 
   @Override
   public Mono<ServerResponse> getTechnologiesByProfileId(ServerRequest request) {
-    long profileId =
-        requestValidator.toLong(request.queryParam(Constants.PROFILE_ID_PARAM).orElseThrow());
+    long profileId = ParseUtil.toLong(request.queryParam(Constants.PROFILE_ID_PARAM).orElseThrow());
     log.info("{} Getting technologies for profile with id: {}", LOG_PREFIX, profileId);
     return technologyServicePort
         .getProfileTechnologies(profileId)
         .flatMap(
             technologies ->
-                ServerResponse.status(HttpStatus.OK)
-                    .bodyValue(defaultServerResponseMapper.toResponse(technologies)));
+                buildResponse(HttpStatus.OK, technologies, null, defaultServerResponseMapper))
+        .doOnError(logErrorHandler())
+        .onErrorResume(StandardException.class, standardErrorHandler())
+        .onErrorResume(genericErrorHandler());
   }
 
   @Override
   public Mono<ServerResponse> deleteTechnologies(ServerRequest request) {
     ProfileIdsRequest idsRequest =
         new ProfileIdsRequest(request.queryParams().get(Constants.PROFILE_ID_PARAM));
-    return requestValidator
-        .validate(idsRequest)
+    return Mono.just(idsRequest)
         .flatMap(
             profileIdsRequest -> {
               log.info(
@@ -139,9 +151,36 @@ public class TechnologyHandlerV1 implements TechnologyHandler {
                   profileIdsMapper.toTechnologyIds(profileIdsRequest));
             })
         .then(
-            ServerResponse.status(ServerResponses.TECHNOLOGIES_DELETED.getHttpStatus())
-                .bodyValue(
-                    defaultServerResponseMapper.toResponse(
-                        ServerResponses.TECHNOLOGIES_DELETED.getMessage())));
+            buildResponse(
+                ServerResponses.TECHNOLOGIES_DELETED.getHttpStatus(),
+                ServerResponses.TECHNOLOGIES_DELETED.getMessage(),
+                null,
+                defaultServerResponseMapper))
+        .doOnError(logErrorHandler())
+        .onErrorResume(StandardException.class, standardErrorHandler())
+        .onErrorResume(genericErrorHandler());
+  }
+
+  private Consumer<Throwable> logErrorHandler() {
+    return ex ->
+        log.error(
+            "{} Exception {} caught. Caused by: {}",
+            LOG_PREFIX,
+            ex.getClass().getSimpleName(),
+            ex.getMessage());
+  }
+
+  private Function<StandardException, Mono<ServerResponse>> standardErrorHandler() {
+    return ex ->
+        buildResponse(ex.getHttpStatus(), null, ex.getStandardError(), defaultServerResponseMapper);
+  }
+
+  private Function<Throwable, Mono<ServerResponse>> genericErrorHandler() {
+    return ex ->
+        buildResponse(
+            ServerResponses.SERVER_ERROR.getHttpStatus(),
+            null,
+            buildStandardError(ServerResponses.SERVER_ERROR),
+            defaultServerResponseMapper);
   }
 }

@@ -8,27 +8,31 @@ import com.pragma.challenge.technology_service.domain.model.TechnologyIds;
 import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
 import com.pragma.challenge.technology_service.domain.model.TechnologyProfile;
 import com.pragma.challenge.technology_service.domain.spi.TechnologyPersistencePort;
+import com.pragma.challenge.technology_service.domain.validation.ValidNotNull;
+import com.pragma.challenge.technology_service.domain.validation.ValidSize;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class TechnologyUseCase implements TechnologyServicePort {
   private static final String LOG_PREFIX = "[TECHNOLOGY_USE_CASE] >>>";
 
   private final TechnologyPersistencePort technologyPersistencePort;
-  private final TransactionalOperator transactionalOperator;
 
   @Override
   public Mono<Technology> registerTechnology(Technology technology) {
-    return technologyPersistencePort
-        .existsByName(technology.name())
+    return Mono.just(technology)
+        .flatMap(
+            technology1 -> {
+              ValidNotNull.valid(technology);
+              ValidSize.valid(technology);
+              return Mono.just(technology);
+            })
+        .flatMap(technology1 -> technologyPersistencePort.existsByName(technology.name()))
         .flatMap(
             exist -> {
               if (Boolean.TRUE.equals(exist)) {
@@ -37,8 +41,7 @@ public class TechnologyUseCase implements TechnologyServicePort {
               }
               return Mono.empty();
             })
-        .then(Mono.defer(() -> technologyPersistencePort.save(technology)))
-        .as(transactionalOperator::transactional);
+        .then(Mono.defer(() -> technologyPersistencePort.save(technology)));
   }
 
   @Override
@@ -63,8 +66,7 @@ public class TechnologyUseCase implements TechnologyServicePort {
   public Mono<Void> registerTechnologyProfileRelation(List<TechnologyProfile> technologyProfiles) {
     return Flux.fromIterable(technologyProfiles)
         .flatMap(technologyPersistencePort::saveTechnologyProfile)
-        .then()
-        .as(transactionalOperator::transactional);
+        .then();
   }
 
   @Override
@@ -83,7 +85,9 @@ public class TechnologyUseCase implements TechnologyServicePort {
                         technologyId ->
                             technologyPersistencePort
                                 .deleteRelationByProfileId(profileId)
-                                .then(technologyPersistencePort.deleteTechnologiesByIds(technologyId))))
+                                .then(
+                                    technologyPersistencePort.deleteTechnologiesByIds(
+                                        technologyId))))
         .then();
   }
 }
