@@ -17,6 +17,7 @@ import com.pragma.challenge.technology_service.infrastructure.adapters.persisten
 import com.pragma.challenge.technology_service.infrastructure.entrypoints.dto.DefaultServerResponse;
 import java.util.List;
 import java.util.Objects;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,34 +38,64 @@ public class TechnologyRouterRestIT {
   @Autowired TechnologyRepository technologyRepository;
   @Autowired TechnologyProfileRepository technologyProfileRepository;
 
+  private Long techId1;
+  private Long techId2;
+  private Long techId3;
+
   @BeforeEach
   void setUp() {
-    technologyRepository
-        .saveAll(
-            List.of(
-                TechnologyEntity.builder()
-                    .name("Node.js")
-                    .description("Open-source, cross-platform JavaScript runtime environment")
-                    .build(),
-                TechnologyEntity.builder()
-                    .name("React")
-                    .description(
-                        "JavaScript library used for building particularly single-page applications")
-                    .build(),
-                TechnologyEntity.builder()
-                    .name("Spring Boot")
-                    .description(
-                        "Framework for building production-ready Java applications with minimal configuration")
-                    .build()))
-        .blockLast();
+    List<TechnologyEntity> savedTechnologies =
+        technologyRepository
+            .saveAll(
+                List.of(
+                    TechnologyEntity.builder()
+                        .name("Node.js")
+                        .description("Open-source, cross-platform JavaScript runtime environment")
+                        .build(),
+                    TechnologyEntity.builder()
+                        .name("React")
+                        .description(
+                            "JavaScript library used for building particularly single-page applications")
+                        .build(),
+                    TechnologyEntity.builder()
+                        .name("Spring Boot")
+                        .description(
+                            "Framework for building production-ready Java applications with minimal configuration")
+                        .build()))
+            .collectList()
+            .block();
+
     technologyProfileRepository
         .saveAll(
             List.of(
-                TechnologyProfileEntity.builder().profileId(1L).technologyId(1L).build(),
-                TechnologyProfileEntity.builder().profileId(1L).technologyId(2L).build(),
-                TechnologyProfileEntity.builder().profileId(2L).technologyId(2L).build(),
-                TechnologyProfileEntity.builder().profileId(2L).technologyId(3L).build()))
+                TechnologyProfileEntity.builder()
+                    .profileId(1L)
+                    .technologyId(savedTechnologies.get(0).getId())
+                    .build(),
+                TechnologyProfileEntity.builder()
+                    .profileId(1L)
+                    .technologyId(savedTechnologies.get(1).getId())
+                    .build(),
+                TechnologyProfileEntity.builder()
+                    .profileId(2L)
+                    .technologyId(savedTechnologies.get(1).getId())
+                    .build(),
+                TechnologyProfileEntity.builder()
+                    .profileId(2L)
+                    .technologyId(savedTechnologies.get(2).getId())
+                    .build()))
         .blockLast();
+
+
+    techId1 = savedTechnologies.get(0).getId();
+    techId2 = savedTechnologies.get(1).getId();
+    techId3 = savedTechnologies.get(2).getId();
+  }
+
+  @AfterEach
+  void tearDown() {
+    technologyProfileRepository.deleteAll().block();
+    technologyRepository.deleteAll().block();
   }
 
   @Test
@@ -76,7 +107,8 @@ public class TechnologyRouterRestIT {
         .exchange()
         .expectStatus()
         .isCreated()
-        .expectBody(new ParameterizedTypeReference<DefaultServerResponse<String>>() {})
+        .expectBody(
+            new ParameterizedTypeReference<DefaultServerResponse<String, StandardError>>() {})
         .consumeWith(
             exchangeResult -> {
               var response = exchangeResult.getResponseBody();
@@ -94,24 +126,28 @@ public class TechnologyRouterRestIT {
         .exchange()
         .expectStatus()
         .isBadRequest()
-        .expectBody(StandardError.class)
+        .expectBody(
+            new ParameterizedTypeReference<DefaultServerResponse<Object, StandardError>>() {})
         .consumeWith(
             exchangeResult -> {
-              var error = exchangeResult.getResponseBody();
-              assertNotNull(error);
-              assertEquals(ServerResponses.BAD_REQUEST.getMessage(), error.getDescription());
+              var response = exchangeResult.getResponseBody();
+              assertNotNull(response);
+              assertEquals(
+                  ServerResponses.BAD_REQUEST.getMessage(), response.error().getDescription());
             });
   }
 
   @Test
   void technologiesExists() {
+    String uri = String.format("%s/exists?id=%d&id=%d&id=%d", BASE_PATH, techId1, techId2, techId3);
     webTestClient
         .get()
-        .uri(BASE_PATH + "/exists?id=1&id=2&id=3")
+        .uri(uri)
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(new ParameterizedTypeReference<DefaultServerResponse<Boolean>>() {})
+        .expectBody(
+            new ParameterizedTypeReference<DefaultServerResponse<Boolean, StandardError>>() {})
         .consumeWith(
             exchangeResult -> {
               var response = exchangeResult.getResponseBody();
@@ -130,7 +166,7 @@ public class TechnologyRouterRestIT {
         .isOk()
         .expectBody(
             new ParameterizedTypeReference<
-                DefaultServerResponse<List<TechnologyNoDescription>>>() {})
+                DefaultServerResponse<List<TechnologyNoDescription>, StandardError>>() {})
         .consumeWith(
             exchangeResult -> {
               var response = exchangeResult.getResponseBody();
@@ -147,7 +183,8 @@ public class TechnologyRouterRestIT {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(new ParameterizedTypeReference<DefaultServerResponse<String>>() {})
+        .expectBody(
+            new ParameterizedTypeReference<DefaultServerResponse<String, StandardError>>() {})
         .consumeWith(
             exchangeResult -> {
               var response = exchangeResult.getResponseBody();

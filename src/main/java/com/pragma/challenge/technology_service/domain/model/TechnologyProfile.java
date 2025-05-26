@@ -1,3 +1,5 @@
 package com.pragma.challenge.technology_service.domain.model;
 
-public record TechnologyProfile(Long technologyId, Long profileId) {}
+import com.pragma.challenge.technology_service.domain.validation.annotation.NotNull;
+
+public record TechnologyProfile(@NotNull Long technologyId, @NotNull Long profileId) {}

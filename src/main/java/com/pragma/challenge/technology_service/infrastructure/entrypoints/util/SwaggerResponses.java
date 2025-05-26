@@ -1,5 +1,6 @@
 package com.pragma.challenge.technology_service.infrastructure.entrypoints.util;
 
+import com.pragma.challenge.technology_service.domain.exceptions.StandardError;
 import com.pragma.challenge.technology_service.domain.model.TechnologyNoDescription;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -30,5 +31,12 @@ public final class SwaggerResponses {
   @AllArgsConstructor
   public static class DefaultTechnologyNoDescriptionResponse {
     private TechnologyNoDescription data;
+  }
+
+  @Data
+  @Schema(name = "DefaultErrorResponse")
+  @AllArgsConstructor
+  public static class DefaultErrorResponse {
+    private StandardError error;
   }
 }
