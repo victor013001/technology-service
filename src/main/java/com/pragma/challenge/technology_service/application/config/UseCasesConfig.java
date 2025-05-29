@@ -9,6 +9,7 @@ import com.pragma.challenge.technology_service.infrastructure.adapters.persisten
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyProfileRepository;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,6 +21,7 @@ public class UseCasesConfig {
   private final TechnologyEntityMapper technologyEntityMapper;
   private final TechnologyProfileRepository technologyProfileRepository;
   private final TechnologyProfileEntityMapper technologyProfileEntityMapper;
+  private final CacheManager cacheManager;
 
   @Bean
   public TechnologyServicePort technologyServicePort(
@@ -33,6 +35,7 @@ public class UseCasesConfig {
         technologyRepository,
         technologyEntityMapper,
         technologyProfileRepository,
-        technologyProfileEntityMapper);
+        technologyProfileEntityMapper,
+        cacheManager);
   }
 }

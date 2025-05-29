@@ -88,3 +88,9 @@ resilience4j:
       serviceBulkhead:
         maxConcurrentCalls: 5
         maxWaitDuration: 1s
+
+logging:
+  level:
+    org:
+      springframework:
+        cache: TRACE
