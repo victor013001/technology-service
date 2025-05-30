@@ -9,10 +9,8 @@ import com.pragma.challenge.technology_service.infrastructure.adapters.persisten
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyProfileRepository;
 import com.pragma.challenge.technology_service.infrastructure.adapters.persistence.repository.TechnologyRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -27,7 +25,6 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
   private final TechnologyEntityMapper technologyEntityMapper;
   private final TechnologyProfileRepository technologyProfileRepository;
   private final TechnologyProfileEntityMapper technologyProfileEntityMapper;
-  private final CacheManager cacheManager;
 
   @Override
   public Mono<Technology> save(Technology technology) {
@@ -38,8 +35,7 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
         technology.description());
     return technologyRepository
         .save(technologyEntityMapper.toEntity(technology))
-        .map(technologyEntityMapper::toModel)
-        .doOnSuccess(unused -> clearCache("exists-name", "Cache cleared for technology names"));
+        .map(technologyEntityMapper::toModel);
   }
 
   @Override
@@ -53,7 +49,7 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
   @Cacheable(value = "exists-id", key = "#id")
   public Mono<Boolean> existsById(Long id) {
     log.info("{} Checking if technology with id: {} exists.", LOG_PREFIX, id);
-    return technologyRepository.existsById(id).cache();
+    return technologyRepository.existsById(id);
   }
 
   @Override
@@ -65,8 +61,7 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
         technologyProfile.profileId());
     return technologyProfileRepository
         .save(technologyProfileEntityMapper.toEntity(technologyProfile))
-        .map(technologyProfileEntityMapper::toModel)
-        .doOnSuccess(savedProfile -> evictCache("profile-technologies", savedProfile.profileId(), "Cache evicted for profile id: {}"));
+        .map(technologyProfileEntityMapper::toModel);
   }
 
   @Override
@@ -76,8 +71,7 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
     return technologyRepository
         .findAllByProfileId(profileId)
         .map(technologyEntityMapper::toTechnologyNoDescription)
-        .collectList()
-        .cache();
+        .collectList();
   }
 
   @Override
@@ -89,48 +83,20 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
         profileId);
     return technologyProfileRepository
         .findProfileIdsByOnlyProfileId(profileId)
-        .collectList()
-        .cache();
+        .collectList();
   }
 
   @Override
   public Mono<Void> deleteRelationByProfileId(Long profileId) {
     log.info("{} Deleting relation where profile id: {}", LOG_PREFIX, profileId);
     return technologyProfileRepository
-        .deleteByProfileId(profileId)
-        .doOnSuccess(unused -> evictCache("profile-technologies", profileId, "Cache evicted for relation with profile id: {}"));
+        .deleteByProfileId(profileId);
   }
 
   @Override
   public Mono<Void> deleteTechnologiesByIds(List<Long> technologyIds) {
     log.info("{} Deleting technologies with ids: {}", LOG_PREFIX, technologyIds);
     return technologyRepository
-        .deleteTechnologiesByIds(technologyIds)
-        .doOnSuccess(unused -> {
-          evictCacheList("technologies", technologyIds, "Cache evicted for technologies: {}");
-          evictCacheList("exists-id", technologyIds, "Cache evicted for technology ids: {}");
-          clearCache("exists-name", "Cache cleared for technology names");
-        });
-  }
-
-  private void evictCache(String cacheName, Object key, String logMessage) {
-    Optional.ofNullable(cacheManager.getCache(cacheName)).ifPresent(cache -> {
-      cache.evict(key);
-      log.info("{} {}", LOG_PREFIX, logMessage, key);
-    });
-  }
-
-  private void evictCacheList(String cacheName, List<Long> keys, String logMessage) {
-    Optional.ofNullable(cacheManager.getCache(cacheName)).ifPresent(cache -> {
-      keys.forEach(cache::evict);
-      log.info("{} {}", LOG_PREFIX, logMessage, keys);
-    });
-  }
-
-  private void clearCache(String cacheName, String logMessage) {
-    Optional.ofNullable(cacheManager.getCache(cacheName)).ifPresent(cache -> {
-      cache.clear();
-      log.info("{} {}", LOG_PREFIX, logMessage);
-    });
+        .deleteTechnologiesByIds(technologyIds);
   }
 }

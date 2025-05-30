@@ -10,6 +10,13 @@ spring:
     url: jdbc:${DB}://${DB_URL}:${DB_PORT}/${DB_SCHEMA}
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD}
+
+  cache:
+    type: redis
 
 management:
   endpoints:
@@ -94,3 +101,6 @@ logging:
     org:
       springframework:
         cache: TRACE
+        data:
+          redis:
+            DEBUG
